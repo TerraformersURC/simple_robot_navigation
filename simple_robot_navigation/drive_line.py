@@ -22,7 +22,7 @@ class MinimalPublisher(Node):
         self.target_distance = 2.0 # move this far in a straight line
 
         # Starts at max speed, will gradually decrease near target
-        self.current_speed = 0.1
+        self.current_speed = 1.0
 
         # Subscribe to odom
         self.odom_sub = self.create_subscription(
