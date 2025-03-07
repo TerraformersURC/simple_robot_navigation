@@ -20,6 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'drive_line = simple_robot_navigation.drive_line:main',
         ],
     },
 )
