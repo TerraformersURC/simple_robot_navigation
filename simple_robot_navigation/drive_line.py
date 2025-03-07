@@ -13,13 +13,16 @@ class MinimalPublisher(Node):
         self.publisher_ = self.create_publisher(Twist, 'cmd_vel', 10)
 
         # Timer to send velocity commands
-        timer_period = 0.2  # seconds per callback
+        timer_period = 0.1  # seconds per callback
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
         # For Odometry
         self.start_x = None # init x
         self.start_y = None # init y
         self.target_distance = 2.0 # move this far in a straight line
+
+        # Starts at max speed, will gradually decrease near target
+        self.current_speed = 0.1
 
         # Subscribe to odom
         self.odom_sub = self.create_subscription(
@@ -41,20 +44,26 @@ class MinimalPublisher(Node):
         
         # Total distance moved from start
         dist_moved = math.sqrt((x - self.start_x)**2 + (y - self.start_y)**2)
+        remaining = self.target_distance - dist_moved
 
-        # Stop if distance > target
-        if dist_moved >= self.target_distance:
+        # Stop if target has been reached
+        if remaining <= 0:
             # 0 velocity twist
             stop_msg = Twist()
             self.publisher_.publish(stop_msg)
 
             # Destroy timer
             self.destroy_timer(self.timer)
+        # Start slowing down if near target
+        elif remaining <= 0.5:
+            # Minimum speed is 0.01 so target is actually reached
+            self.current_speed = max(0.01, 0.1 * remaining)
+
 
     def timer_callback(self):
         msg = Twist()
 
-        msg.linear.x = 0.1
+        msg.linear.x = self.current_speed
         self.publisher_.publish(msg)
         print("Publishing\n")
 
